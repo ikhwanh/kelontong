@@ -14,6 +14,35 @@
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      // Classic script, so it still runs when the module bundle fails to load or throws
+      // before Vue mounts. Without it a startup failure is just a blank page.
+      (function () {
+        var errors = [];
+        function record(msg) {
+          if (msg && errors.indexOf(msg) < 0) errors.push(msg);
+        }
+        window.addEventListener('error', function (e) {
+          record(e.error ? e.error.stack || e.error.message : e.message || (e.target && e.target.src ? 'Failed to load ' + e.target.src : ''));
+        }, true);
+        window.addEventListener('unhandledrejection', function (e) {
+          record(e.reason ? e.reason.stack || e.reason.message || String(e.reason) : 'Unhandled promise rejection');
+        });
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            var app = document.getElementById('app');
+            if (app.children.length) return;
+            var hint = location.protocol === 'file:'
+              ? 'This page was opened as a file. Run "npm run dev" and open the http://localhost address it prints.'
+              : 'Nothing rendered. Details:';
+            app.innerHTML = '<div style="font:15px/1.5 system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 16px">' +
+              '<h1 style="font-size:20px">POS couldn’t start</h1><p></p><pre style="white-space:pre-wrap;font-size:12px;background:#EDEFEB;padding:12px;border-radius:8px"></pre></div>';
+            app.querySelector('p').textContent = hint;
+            app.querySelector('pre').textContent = errors.join('\n\n') || 'No error was reported. Open the browser console (F12) for more.';
+          }, 3000);
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

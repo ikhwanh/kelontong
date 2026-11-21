@@ -45,6 +45,10 @@ export default defineConfig({
       },
     }),
   ],
+  // Not Vite's default 5173/4173: a PWA's service worker and storage belong to the
+  // origin, so sharing a port with another project's PWA serves that app instead.
+  server: { port: 5180, strictPort: true },
+  preview: { port: 4180, strictPort: true },
   optimizeDeps: {
     exclude: ['@vlcn.io/crsqlite-wasm', 'zxing-wasm'],
   },

@@ -2,8 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Icon from './components/Icon.vue';
-import InstallGate from './views/InstallGate.vue';
-import { pwa, applyUpdate } from './services/pwa.js';
+import { pwa, applyUpdate, mustInstall } from './services/pwa.js';
 import { initDb, dataVersion, one } from './db/index.js';
 import { ensureDevice, device } from './services/device.js';
 import { loadSettings, loadPrefs, prefs, requestPersistence } from './services/settings.js';
@@ -12,28 +11,11 @@ import { loadActiveCart, activeCartHasItems } from './services/cart.js';
 import { toasts, toast, dismissToast } from './services/ui.js';
 
 const route = useRoute();
-const allowBrowser = import.meta.env.DEV || import.meta.env.VITE_ALLOW_BROWSER === '1';
-const readBypass = () => {
-  try {
-    return allowBrowser && sessionStorage.getItem('pos-dev-browser') === '1';
-  } catch {
-    return false;
-  }
-};
-const bypassGate = ref(readBypass());
-function continueInBrowser() {
-  try {
-    sessionStorage.setItem('pos-dev-browser', '1');
-  } catch {
-    /* session storage is optional */
-  }
-  bypassGate.value = true;
-}
 const phase = ref('idle');
 const bootError = ref('');
 const exportDue = ref(false);
 
-const gated = computed(() => !pwa.standalone && !bypassGate.value);
+const installPage = computed(() => route.name === 'install');
 const showNav = computed(() => !!route.meta.nav);
 const fullscreen = computed(() => !!route.meta.fullscreen);
 
@@ -77,7 +59,9 @@ async function refreshExportDue() {
 
 watch(dataVersion, refreshExportDue);
 watch(() => prefs.lastExportAt, refreshExportDue);
-watch(gated, (g) => !g && boot(), { immediate: true });
+// The database only opens in the installed app, so a browser tab never collects data
+// that the installed app (with its own storage on iOS) wouldn't see.
+watch(mustInstall, (must) => !must && boot(), { immediate: true });
 
 const reload = () => window.location.reload();
 
@@ -95,7 +79,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <InstallGate v-if="gated" :allow-browser="allowBrowser" @continue="continueInBrowser" />
+  <RouterView v-if="installPage || mustInstall" />
 
   <div v-else-if="phase === 'error'" class="shell">
     <div class="page" style="justify-content: center; flex: 1">

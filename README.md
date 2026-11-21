@@ -9,10 +9,10 @@ Offline point of sale for one retail shop, cash only, running as an installed PW
 
 ```sh
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5180
 npm test           # unit tests for money, checkout, costing, receipt, CSV, IDs
 npm run build      # production build in dist/, with the service worker
-npm run preview    # serve dist/ on http://localhost:4173
+npm run preview    # serve dist/ on http://localhost:4180
 ```
 
 The app refuses to run in a plain browser tab (spec §6): it shows the install screen until it runs as an installed app. Development builds (`npm run dev`) show a "Continue in this browser" link on that screen. To get the link in a production build, for testing only, build with `VITE_ALLOW_BROWSER=1 npm run build`.

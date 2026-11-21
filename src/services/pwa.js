@@ -1,5 +1,15 @@
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { registerSW } from 'virtual:pwa-register';
+
+export const allowBrowser = import.meta.env.DEV || import.meta.env.VITE_ALLOW_BROWSER === '1';
+
+function readBypass() {
+  try {
+    return allowBrowser && sessionStorage.getItem('pos-dev-browser') === '1';
+  } catch {
+    return false;
+  }
+}
 
 export const pwa = reactive({
   standalone: false,
@@ -7,7 +17,21 @@ export const pwa = reactive({
   installPrompt: null,
   installed: false,
   needRefresh: false,
+  browserBypass: readBypass(),
 });
+
+// Spec §6: outside the installed app, every screen is replaced by the install page.
+export const mustInstall = computed(() => !pwa.standalone && !pwa.browserBypass);
+
+export function continueInBrowser() {
+  if (!allowBrowser) return;
+  try {
+    sessionStorage.setItem('pos-dev-browser', '1');
+  } catch {
+    /* session storage is optional */
+  }
+  pwa.browserBypass = true;
+}
 
 let updateSW = null;
 

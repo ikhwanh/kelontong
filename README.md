@@ -1,75 +1,43 @@
-# POS
+# POS for your shop
 
-A point of sale for a small shop that works with no internet, no server and no account. Scan or tap products into the cart, take cash, send the receipt over WhatsApp, and keep track of stock. It runs on the Android tablet, Windows PC or iPad you already have. If the shop has more than one device, they keep each other up to date when you send a sync file over WhatsApp.
+Selling from a small shop shouldn't need an expensive machine, a monthly plan or a steady internet connection. POS turns the tablet, computer or iPad you already have into a cash register.
 
-## Try it
+**[▶ Try it now at ikhwanh.github.io/kelontong](https://ikhwanh.github.io/kelontong/)**
 
-**[Open the app → ikhwanh.github.io/kelontong](https://ikhwanh.github.io/kelontong/)**
+## What you can do
 
-It takes about a minute:
+- **Sell quickly.** Scan a barcode with the camera or a barcode scanner, or tap the product. Change quantities, give a discount, and see the change to hand back.
+- **Hold a cart.** Is a customer still deciding? Park their cart, serve the next person, and pick it up again later.
+- **Send receipts on WhatsApp.** Add your shop name, header and footer once, and every receipt looks like yours.
+- **Know your stock.** Record stock coming in and going out, and see which products are running low before they run out.
+- **See how the shop is doing.** Sales by day, your busiest hours, best-selling products, profit, and an end-of-day summary.
+- **Add products fast.** Type them in one by one, or bring in your existing list from Excel or a CSV file.
 
-1. Open the link in **Chrome** on Android, **Chrome or Edge** on Windows, or **Safari** on iPad.
-2. Install it when the page asks. On Android and Windows, use the **Install** button. On iPad, tap **Share**, then **Add to Home Screen**.
-3. Open POS from your home screen or Start menu. Add a few products, or import a CSV or Excel list, and make your first sale.
+## Works anywhere, even with no signal
 
-Once it's installed, the app works offline, even in airplane mode. Everything you enter stays on that device and is never uploaded. Have a second device? Install it there too and send a sync file from one to the other over WhatsApp to see them catch up.
+The internet is only needed the first time you install POS. After that it runs completely offline. Power cuts, weak signal and empty data plans won't stop a sale.
 
-The app is still an early preview (see [Not done yet](#not-done-yet)). Try it freely, but keep your real records somewhere else for now. Found a bug or have an idea? [Open an issue](https://github.com/ikhwanh/kelontong/issues).
+There's no account to make and nothing to sign up for. Your sales and stock stay on your own device and are never uploaded anywhere.
 
-## How it's built
+## More than one device? Keep them together
 
-An installed PWA on Vue and cr-sqlite. Each device has its own database, and devices sync by exchanging cr-sqlite change files.
+Run the shop from a tablet at the counter and a laptop at home. When you want them to match, send a sync file from one to the other on WhatsApp and open it. Each device picks up the other's sales and stock.
 
-- Functional spec: [SPECS.md](SPECS.md)
-- Database design: [DATABASE.md](DATABASE.md)
+## Get started in a minute
 
-## Run it locally
+1. Open **[ikhwanh.github.io/kelontong](https://ikhwanh.github.io/kelontong/)** on your device:
+   - **Android:** in Chrome
+   - **Windows:** in Chrome or Edge
+   - **iPad:** in Safari
+2. Install it when the page asks. On iPad, tap **Share**, then **Add to Home Screen**.
+3. Open POS from your home screen or Start menu, add a few products, and make your first sale.
 
-```sh
-npm install
-npm run dev        # http://localhost:5180
-npm test           # unit tests for money, checkout, costing, receipt, CSV, IDs
-npm run build      # production build in dist/, with the service worker
-npm run preview    # serve dist/ on http://localhost:4180
-```
+## Good to know
 
-The app refuses to run in a plain browser tab (spec §6): it shows the install screen until it runs as an installed app. Development builds (`npm run dev`) show a "Continue in this browser" link on that screen. To get the link in a production build, for testing only, build with `VITE_ALLOW_BROWSER=1 npm run build`.
+POS is new and still being tested on real shop devices. Try it as much as you like, but keep your usual records too for now.
 
-Installing needs HTTPS, or `localhost`.
+Something not working, or an idea that would help your shop? [Tell us here](https://github.com/ikhwanh/kelontong/issues).
 
-## Layout
+---
 
-```
-src/
-  db/
-    schema.js        migrations: replicated tables (CRRs) and local-only tables
-    index.js         opens cr-sqlite (wasm + IndexedDB), runs migrations, query helpers
-    sync.js          the only module that calls crsql_*: exportChanges / importChanges
-  lib/               pure logic, unit-tested: money, qty, checkout, costing, receipt, csv, ids, time
-                     plus camera.js (zxing-wasm) and handScanner.js (keyboard-mode scanners)
-  services/          app logic on top of the database
-    cart.js          active and parked carts (local `carts` table)
-    sales.js         checkout transaction, cancel sale
-    stock.js         ledger movements, stock_summary rebuild (moving average)
-    products.js      products, categories, barcodes
-    importer.js      CSV / .xlsx product import with preview
-    syncFiles.js     sync file export (Web Share / download) and import log
-    reports.js       report queries
-    device.js, settings.js, pwa.js, ui.js
-  views/             one file per screen
-  components/        cart panel, sheets (discount, quantity, text), icons
-  sw.js              service worker: precache, offline navigation, Web Share Target
-```
-
-## Behaviour worth knowing
-
-- **Hand scanners.** On the checkout screen, a burst of keystrokes (under 40 ms apart, at least 4 characters) ending in Enter counts as a scan, even with no field focused. The search box also accepts a typed or scanned barcode or SKU followed by Enter.
-- **Sync files** are `pos-sync-<code>-<date>-<time>.txt`: a `POSSYNC1` line, then base64 of the gzipped JSON from DATABASE.md §7. They are text files because Chrome's Web Share only accepts certain file types and `.gz` isn't one of them. On Android the installed app is a share target for these files.
-- **Updates** follow the prompt pattern. The "Update available" banner won't reload while the cart has items.
-- **Device codes** are a random letter and digit on first run. If an import brings in another device with the same code, a banner asks you to change this one under Sync.
-
-## Not done yet
-
-- **cr-sqlite is the npm build** (`@vlcn.io/crsqlite-wasm` 0.16.0), not a WASM built from the v0.16.3 tag as DATABASE.md §12.1 decides. Building it needs the Rust nightly and Emscripten toolchain. Swap in the self-built `crsqlite.wasm` and its JS glue when that build exists. The rest of the app only goes through `src/db/index.js` and `src/db/sync.js`.
-- **The device spike (§12.2) hasn't been run.** Before relying on the app, check on a real Android tablet, Windows PC and iPad, each installed: the data survives a reboot and a week of disuse, persistent storage is granted, the share sheet accepts the `.txt` sync file, and export and import of about 100k changes run in acceptable time.
-- Camera scanning has been built but not tried on real cameras.
+Developers: see [DEVELOPMENT.md](DEVELOPMENT.md).

@@ -1,11 +1,29 @@
 # POS
 
-Offline point of sale for one retail shop, cash only, running as an installed PWA on Android tablets, Windows PCs and iPads. Devices sync by sending cr-sqlite change files to each other through WhatsApp. There is no server.
+A point of sale for a small shop that works with no internet, no server and no account. Scan or tap products into the cart, take cash, send the receipt over WhatsApp, and keep track of stock. It runs on the Android tablet, Windows PC or iPad you already have. If the shop has more than one device, they keep each other up to date when you send a sync file over WhatsApp.
+
+## Try it
+
+**[Open the app → ikhwanh.github.io/kelontong](https://ikhwanh.github.io/kelontong/)**
+
+It takes about a minute:
+
+1. Open the link in **Chrome** on Android, **Chrome or Edge** on Windows, or **Safari** on iPad.
+2. Install it when the page asks. On Android and Windows, use the **Install** button. On iPad, tap **Share**, then **Add to Home Screen**.
+3. Open POS from your home screen or Start menu. Add a few products, or import a CSV or Excel list, and make your first sale.
+
+Once it's installed, the app works offline, even in airplane mode. Everything you enter stays on that device and is never uploaded. Have a second device? Install it there too and send a sync file from one to the other over WhatsApp to see them catch up.
+
+The app is still an early preview (see [Not done yet](#not-done-yet)). Try it freely, but keep your real records somewhere else for now. Found a bug or have an idea? [Open an issue](https://github.com/ikhwanh/kelontong/issues).
+
+## How it's built
+
+An installed PWA on Vue and cr-sqlite. Each device has its own database, and devices sync by exchanging cr-sqlite change files.
 
 - Functional spec: [SPECS.md](SPECS.md)
 - Database design: [DATABASE.md](DATABASE.md)
 
-## Run it
+## Run it locally
 
 ```sh
 npm install

@@ -6,6 +6,8 @@ import { readFileSync } from 'node:fs';
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 export default defineConfig({
+  // GitHub Pages serves the app from /<repo>/, set by the deploy workflow.
+  base: process.env.BASE_PATH || '/',
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
@@ -25,19 +27,19 @@ export default defineConfig({
         name: 'POS',
         short_name: 'POS',
         description: 'Offline point of sale for one shop, cash only.',
-        start_url: '/',
-        scope: '/',
+        start_url: '.',
+        scope: '.',
         display: 'standalone',
         orientation: 'any',
         background_color: '#F4F5F2',
         theme_color: '#0F6B5F',
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         share_target: {
-          action: '/share-target',
+          action: 'share-target',
           method: 'POST',
           enctype: 'multipart/form-data',
           params: { files: [{ name: 'file', accept: ['text/plain', '.txt'] }] },

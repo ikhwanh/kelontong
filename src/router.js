@@ -7,7 +7,7 @@ import { mustInstall } from './services/pwa.js';
 const nav = { nav: true };
 
 export const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/install', name: 'install', component: Install, meta: { standalonePage: true } },
     { path: '/', name: 'checkout', component: Checkout, meta: { ...nav, wideCart: true } },

@@ -2,6 +2,7 @@ import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from
 import { registerRoute, NavigationRoute } from 'workbox-routing';
 
 const SHARE_CACHE = 'pos-share-target';
+const BASE = new URL(self.registration.scope).pathname;
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
@@ -14,7 +15,7 @@ registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));
 // Android Web Share Target: WhatsApp → share → POS. The file is parked in a cache and
 // the app picks it up on the Sync screen.
 registerRoute(
-  ({ url }) => url.pathname === '/share-target',
+  ({ url }) => url.pathname === BASE + 'share-target',
   async ({ request }) => {
     const form = await request.formData();
     const file = form.get('file');
@@ -22,7 +23,7 @@ registerRoute(
       const cache = await caches.open(SHARE_CACHE);
       await cache.put('/shared-file', new Response(file, { headers: { 'X-File-Name': encodeURIComponent(file.name || 'sync.txt') } }));
     }
-    return Response.redirect('/sync?shared=1', 303);
+    return Response.redirect(BASE + 'sync?shared=1', 303);
   },
   'POST',
 );

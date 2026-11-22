@@ -6,7 +6,7 @@ import { replayCost } from '../src/lib/costing.js';
 import { buildReceiptText, normalizePhone } from '../src/lib/receipt.js';
 import { parseCsv } from '../src/lib/csv.js';
 import { productIdForSku, categoryIdForName, cancelMovementId } from '../src/lib/ids.js';
-import { cropForRegion, centeredCrop } from '../src/lib/scanRegion.js';
+import { cropForRegion, centeredCrop, regionCenter } from '../src/lib/scanRegion.js';
 
 describe('money', () => {
   it('formats rupiah with dot separators', () => {
@@ -172,6 +172,13 @@ describe('scan region', () => {
     expect(c.x).toBe(0);
     expect(c.y).toBe(0);
     expect(c.x + c.w).toBeLessThanOrEqual(720);
+  });
+
+  it('gives the frame center as a 0-1 point for focus and exposure', () => {
+    const p = regionCenter(rect(0, 0, 390, 844), rect(50, 256, 290, 180), 720, 1280);
+    expect(p.x).toBeCloseTo(0.5, 2);
+    expect(p.y).toBeCloseTo(525 / 1280, 2);
+    expect(regionCenter(rect(0, 0, 0, 0), rect(0, 0, 0, 0), 720, 1280)).toBeNull();
   });
 
   it('falls back to the middle of the stream before layout', () => {

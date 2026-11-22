@@ -1,6 +1,6 @@
 import { prepareZXingModule, readBarcodes } from 'zxing-wasm/reader';
 import wasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url';
-import { centeredCrop, cropForRegion } from './scanRegion.js';
+import { centeredCrop, cropForRegion, regionCenter } from './scanRegion.js';
 
 // The default loader fetches the .wasm from a CDN, which an offline PWA can't reach.
 prepareZXingModule({
@@ -10,10 +10,11 @@ prepareZXingModule({
 // Each extra format costs decode time on every frame, and the 2D ones (QR, DataMatrix)
 // are the most expensive, so only the formats found on retail goods and shelf labels.
 // The on-screen frame keeps barcodes horizontal and upright, so rotation and inverted
-// (light-on-dark) passes are wasted work.
+// (light-on-dark) passes are wasted work. tryHarder stays on: it scans many more rows
+// across the barcode, which is what finds a clean row in blurry, noisy low-light frames.
 const READER_OPTIONS = {
   formats: ['EAN-13', 'EAN-8', 'UPC-A', 'UPC-E', 'Code128', 'Code39', 'ITF'],
-  tryHarder: false,
+  tryHarder: true,
   tryRotate: false,
   tryInvert: false,
   maxNumberOfSymbols: 1,
@@ -23,25 +24,17 @@ const READER_OPTIONS = {
 // item can be scanned again quickly without a held barcode adding itself repeatedly.
 const REAPPEAR_MS = 500;
 
-// Many phones' main lens can't focus closer than ~10 cm; a little zoom lets the
-// cashier hold the phone further back where the barcode is sharp.
-const PREFERRED_ZOOM = 1.5;
+// Re-aim focus and exposure only when the frame has moved this far (as a share of the
+// stream), since each applyConstraints call can make the camera refocus.
+const POINT_MOVE = 0.02;
 
 const SIZE = { width: { ideal: 1280 }, height: { ideal: 720 } };
-
-function cameraTuning(caps) {
-  const sets = [];
-  if (caps.focusMode?.includes('continuous')) sets.push({ focusMode: 'continuous' });
-  if (caps.zoom && caps.zoom.max >= PREFERRED_ZOOM) {
-    sets.push({ zoom: Math.max(caps.zoom.min, PREFERRED_ZOOM) });
-  }
-  return sets;
-}
 
 /**
  * Streams the rear camera into `video` and calls `onCode(text)` each time a barcode
  * comes into view inside `region`, the on-screen frame element (the middle of the
- * stream when omitted). Returns { stop, setTorch, torchSupported }.
+ * stream when omitted). Focus and exposure are aimed at `region` where the browser
+ * supports it. Returns { stop, setTorch, torchSupported }.
  */
 export async function startCamera(video, onCode, { region } = {}) {
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -55,10 +48,29 @@ export async function startCamera(video, onCode, { region } = {}) {
 
   const track = stream.getVideoTracks()[0];
   const caps = track.getCapabilities?.() || {};
-  // Separate advanced sets so a device that rejects one (e.g. zoom) still gets the other.
-  // applyConstraints replaces earlier constraints, so the torch call re-sends these too.
-  const tuning = cameraTuning(caps);
-  if (tuning.length) await track.applyConstraints({ ...SIZE, advanced: tuning }).catch(() => {});
+  const canAim = !!navigator.mediaDevices.getSupportedConstraints?.().pointsOfInterest;
+  let point = null;
+  let torchOn = false;
+
+  // Separate advanced sets so a device that rejects one still gets the others.
+  // applyConstraints replaces earlier constraints, so every call sends the full set.
+  function constraints() {
+    const sets = [];
+    if (caps.focusMode?.includes('continuous')) sets.push({ focusMode: 'continuous' });
+    if (point) sets.push({ pointsOfInterest: [point] });
+    if (caps.torch) sets.push({ torch: torchOn });
+    return { ...SIZE, advanced: sets };
+  }
+
+  if (caps.focusMode?.includes('continuous')) await track.applyConstraints(constraints()).catch(() => {});
+
+  function aimAt(view, box, vw, vh) {
+    const next = regionCenter(view, box, vw, vh);
+    if (!next) return;
+    if (point && Math.abs(next.x - point.x) < POINT_MOVE && Math.abs(next.y - point.y) < POINT_MOVE) return;
+    point = next;
+    track.applyConstraints(constraints()).catch(() => {});
+  }
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -88,9 +100,16 @@ export async function startCamera(video, onCode, { region } = {}) {
         // a neighbouring product's barcode. Measured every frame because the frame moves
         // when the panel below it grows or the phone rotates.
         const vw = video.videoWidth, vh = video.videoHeight;
-        const { x, y, w, h } = region
-          ? cropForRegion(video.getBoundingClientRect(), region.getBoundingClientRect(), vw, vh)
-          : centeredCrop(vw, vh);
+        let crop;
+        if (region) {
+          const view = video.getBoundingClientRect();
+          const box = region.getBoundingClientRect();
+          crop = cropForRegion(view, box, vw, vh);
+          if (canAim) aimAt(view, box, vw, vh);
+        } else {
+          crop = centeredCrop(vw, vh);
+        }
+        const { x, y, w, h } = crop;
         if (canvas.width !== w || canvas.height !== h) {
           canvas.width = w;
           canvas.height = h;
@@ -110,7 +129,13 @@ export async function startCamera(video, onCode, { region } = {}) {
   return {
     torchSupported: !!caps.torch,
     async setTorch(on) {
-      if (caps.torch) await track.applyConstraints({ ...SIZE, advanced: [...tuning, { torch: on }] });
+      if (!caps.torch) return;
+      const was = torchOn;
+      torchOn = on;
+      await track.applyConstraints(constraints()).catch((e) => {
+        torchOn = was;
+        throw e;
+      });
     },
     stop() {
       running = false;

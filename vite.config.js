@@ -24,8 +24,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
       },
       manifest: {
-        name: 'POS',
-        short_name: 'POS',
+        name: 'Kelontong',
+        short_name: 'Kelontong',
         description: 'Offline point of sale for one shop, cash only.',
         start_url: '.',
         scope: '.',

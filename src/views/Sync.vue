@@ -132,7 +132,7 @@ const lastSeen = (d) => history.value.find((h) => h.file_device_id === d.id && h
           <button type="button" class="btn btn-primary" :disabled="!!busy" @click="onExport"><Icon name="share" />{{ busy === 'export' ? 'Preparing…' : 'Export & share changes' }}</button>
           <p class="hint">Opens the share sheet — pick WhatsApp and send the file to the other device. If sharing isn’t supported, the file downloads instead.</p>
           <button type="button" class="btn" :disabled="!!busy" @click="fileInput.click()"><Icon name="download" />{{ busy === 'import' ? 'Importing…' : 'Import sync file' }}</button>
-          <p class="hint">Save the file from WhatsApp, then pick it here. On Android you can also share it from WhatsApp straight to POS. Importing merges changes and never replaces your data; the same file twice is harmless.</p>
+          <p class="hint">Save the file from WhatsApp, then pick it here. On Android you can also share it from WhatsApp straight to Kelontong. Importing merges changes and never replaces your data; the same file twice is harmless.</p>
           <div v-if="history.length" class="list">
             <div v-for="h in history" :key="h.id" class="list-row" style="align-items: flex-start; padding: 12px 14px">
               <span class="hist-icon" :class="historyLine(h).ok ? 'ok' : 'bad'"><Icon :name="historyLine(h).ok ? 'check' : 'warn'" :size="18" /></span>

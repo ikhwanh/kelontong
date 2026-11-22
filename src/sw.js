@@ -12,7 +12,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));
 
-// Android Web Share Target: WhatsApp → share → POS. The file is parked in a cache and
+// Android Web Share Target: WhatsApp → share → Kelontong. The file is parked in a cache and
 // the app picks it up on the Sync screen.
 registerRoute(
   ({ url }) => url.pathname === BASE + 'share-target',

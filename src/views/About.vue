@@ -20,7 +20,7 @@ const author = {
     <main class="scroll">
       <div class="page">
         <div class="card" style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-size: 18px; font-weight: 800">POS</h2>
+          <h2 style="margin: 0; font-size: 18px; font-weight: 800">Kelontong</h2>
           <p class="hint" style="font-size: 14px">An offline cash register for small shops. Made by {{ author.name }}.</p>
           <p class="muted num" style="margin: 0; font-size: 12px">Version {{ version }}</p>
         </div>

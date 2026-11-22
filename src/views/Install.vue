@@ -13,13 +13,13 @@ const manualSteps = computed(() => {
   const ua = navigator.userAgent;
   if (/Firefox\//.test(ua)) {
     return pwa.platform === 'android'
-      ? ['Tap the <strong>⋮</strong> menu', 'Choose <strong>Install</strong>', 'Open POS from your home screen']
+      ? ['Tap the <strong>⋮</strong> menu', 'Choose <strong>Install</strong>', 'Open Kelontong from your home screen']
       : ['Firefox on a computer can’t install apps', 'Open this page in <strong>Chrome</strong> or <strong>Edge</strong>'];
   }
-  if (/SamsungBrowser\//.test(ua)) return ['Tap the <strong>☰</strong> menu', 'Choose <strong>Add page to → Home screen</strong>', 'Open POS from your home screen'];
-  if (pwa.platform === 'android') return ['Tap the <strong>⋮</strong> menu in Chrome', 'Choose <strong>Install app</strong> (or <strong>Add to Home screen</strong>)', 'Open POS from your home screen'];
-  if (/Edg\//.test(ua)) return ['Click the <strong>…</strong> menu in Edge', 'Choose <strong>Apps → Install this site as an app</strong>', 'Open POS from the Start menu or desktop'];
-  return ['Click the install icon at the right end of the address bar, or the <strong>⋮</strong> menu', 'Choose <strong>Cast, save and share → Install page as app</strong>', 'Open POS from the Start menu or desktop'];
+  if (/SamsungBrowser\//.test(ua)) return ['Tap the <strong>☰</strong> menu', 'Choose <strong>Add page to → Home screen</strong>', 'Open Kelontong from your home screen'];
+  if (pwa.platform === 'android') return ['Tap the <strong>⋮</strong> menu in Chrome', 'Choose <strong>Install app</strong> (or <strong>Add to Home screen</strong>)', 'Open Kelontong from your home screen'];
+  if (/Edg\//.test(ua)) return ['Click the <strong>…</strong> menu in Edge', 'Choose <strong>Apps → Install this site as an app</strong>', 'Open Kelontong from the Start menu or desktop'];
+  return ['Click the install icon at the right end of the address bar, or the <strong>⋮</strong> menu', 'Choose <strong>Cast, save and share → Install page as app</strong>', 'Open Kelontong from the Start menu or desktop'];
 });
 
 async function onInstall() {
@@ -38,7 +38,7 @@ async function onInstall() {
       <div class="gate-head">
         <span class="gate-icon"><Icon name="install" :size="34" /></span>
         <h1 id="gate-title">Install the app to start selling</h1>
-        <p>The POS only runs as an installed app, so all your sales and stock stay in one place on this device.</p>
+        <p>Kelontong only runs as an installed app, so all your sales and stock stay in one place on this device.</p>
       </div>
 
       <template v-if="pwa.platform === 'ios'">
@@ -56,7 +56,7 @@ async function onInstall() {
       <template v-else>
         <div class="install-box">
           <p v-if="pwa.installed" class="hint" style="font-size: 14px">
-            Installed. Open <strong>POS</strong> from your home screen or Start menu to continue.
+            Installed. Open <strong>Kelontong</strong> from your home screen or Start menu to continue.
           </p>
           <template v-else>
             <button type="button" class="btn btn-primary btn-lg btn-block" @click="onInstall">

@@ -1,6 +1,6 @@
-# POS for your shop
+# Kelontong for your shop
 
-Selling from a small shop shouldn't need an expensive machine, a monthly plan or a steady internet connection. POS turns the tablet, computer or iPad you already have into a cash register.
+Selling from a small shop shouldn't need an expensive machine, a monthly plan or a steady internet connection. Kelontong turns the tablet, computer or iPad you already have into a cash register.
 
 **[▶ Try it now at ikhwanh.github.io/kelontong](https://ikhwanh.github.io/kelontong/)**
 
@@ -15,7 +15,7 @@ Selling from a small shop shouldn't need an expensive machine, a monthly plan or
 
 ## Works anywhere, even with no signal
 
-The internet is only needed the first time you install POS. After that it runs completely offline. Power cuts, weak signal and empty data plans won't stop a sale.
+The internet is only needed the first time you install Kelontong. After that it runs completely offline. Power cuts, weak signal and empty data plans won't stop a sale.
 
 There's no account to make and nothing to sign up for. Your sales and stock stay on your own device and are never uploaded anywhere.
 
@@ -30,11 +30,11 @@ Run the shop from a tablet at the counter and a laptop at home. When you want th
    - **Windows:** in Chrome or Edge
    - **iPad:** in Safari
 2. Install it when the page asks. On iPad, tap **Share**, then **Add to Home Screen**.
-3. Open POS from your home screen or Start menu, add a few products, and make your first sale.
+3. Open Kelontong from your home screen or Start menu, add a few products, and make your first sale.
 
 ## Good to know
 
-POS is new and still being tested on real shop devices. Try it as much as you like, but keep your usual records too for now.
+Kelontong is new and still being tested on real shop devices. Try it as much as you like, but keep your usual records too for now.
 
 Something not working, or an idea that would help your shop? [Tell us here](https://github.com/ikhwanh/kelontong/issues).
 

@@ -190,6 +190,19 @@ const lastSeen = (d) => history.value.find((h) => h.file_device_id === d.id && h
           </div>
           <p class="hint">System follows the device’s light or dark setting.</p>
         </section>
+
+        <section class="section" aria-labelledby="about-h">
+          <h2 id="about-h" class="section-h">About</h2>
+          <div class="list">
+            <RouterLink to="/about" class="list-row">
+              <div class="main">
+                <div class="t">About this app</div>
+                <div class="s">Author, contact and source code</div>
+              </div>
+              <Icon name="chevron" />
+            </RouterLink>
+          </div>
+        </section>
       </div>
     </main>
 

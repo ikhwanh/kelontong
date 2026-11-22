@@ -24,6 +24,7 @@ export const router = createRouter({
     { path: '/import', name: 'import', component: () => import('./views/Import.vue') },
     { path: '/reports', name: 'reports', component: () => import('./views/Reports.vue'), meta: nav },
     { path: '/sync', name: 'sync', component: () => import('./views/Sync.vue'), meta: nav },
+    { path: '/about', name: 'about', component: () => import('./views/About.vue') },
     { path: '/:rest(.*)*', redirect: '/' },
   ],
 });

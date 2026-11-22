@@ -16,6 +16,7 @@ const router = useRouter();
 const capture = route.query.mode === 'capture';
 
 const video = ref(null);
+const frame = ref(null);
 const cameraError = ref('');
 const torch = ref(false);
 const torchSupported = ref(false);
@@ -25,17 +26,12 @@ const notFound = ref(null);
 const typing = ref(false);
 const qtyFor = ref(null);
 let camera = null;
-let lastCode = '';
-let lastAt = 0;
 
 const paused = computed(() => typing.value || !!qtyFor.value);
 const itemCount = computed(() => cartCalc.value.itemCount);
 
 async function onCode(code) {
-  const now = Date.now();
-  if (paused.value || (code === lastCode && now - lastAt < 1500)) return;
-  lastCode = code;
-  lastAt = now;
+  if (paused.value) return;
   if (capture) {
     beep(true);
     setCapturedCode(code);
@@ -76,10 +72,7 @@ async function undo() {
 
 function onTyped(code) {
   typing.value = false;
-  if (code.trim()) {
-    lastCode = '';
-    onCode(code.trim());
-  }
+  if (code.trim()) onCode(code.trim());
 }
 
 function done() {
@@ -99,7 +92,7 @@ async function toggleTorch() {
 onMounted(async () => {
   try {
     const { startCamera } = await import('../lib/camera.js');
-    camera = await startCamera(video.value, onCode);
+    camera = await startCamera(video.value, onCode, { region: frame.value });
     torchSupported.value = camera.torchSupported;
   } catch (e) {
     cameraError.value = e?.name === 'NotAllowedError'
@@ -122,7 +115,7 @@ const lastInCart = computed(() => (last.value ? cartQtyByProduct.value[last.valu
         <button type="button" class="round" :class="{ on: torch }" aria-label="Flashlight" :aria-pressed="torch" :disabled="!torchSupported" @click="toggleTorch"><Icon name="flash" :size="22" /></button>
       </div>
       <div class="middle">
-        <div class="frame">
+        <div ref="frame" class="frame">
           <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
           <span class="laser"></span>
         </div>

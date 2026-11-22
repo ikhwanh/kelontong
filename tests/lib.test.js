@@ -6,6 +6,7 @@ import { replayCost } from '../src/lib/costing.js';
 import { buildReceiptText, normalizePhone } from '../src/lib/receipt.js';
 import { parseCsv } from '../src/lib/csv.js';
 import { productIdForSku, categoryIdForName, cancelMovementId } from '../src/lib/ids.js';
+import { cropForRegion, centeredCrop } from '../src/lib/scanRegion.js';
 
 describe('money', () => {
   it('formats rupiah with dot separators', () => {
@@ -145,5 +146,35 @@ describe('deterministic ids', () => {
     expect(categoryIdForName('Drinks ')).toBe(categoryIdForName('drinks'));
     expect(cancelMovementId('x')).toBe(cancelMovementId('x'));
     expect(productIdForSku('A')).not.toBe(productIdForSku('B'));
+  });
+});
+
+describe('scan region', () => {
+  const rect = (left, top, width, height) => ({ left, top, width, height });
+
+  it('maps the on-screen frame onto a portrait stream shown with object-fit: cover', () => {
+    // 390x844 phone screen, 720x1280 stream: scaled by 844/1280, sides trimmed.
+    const c = cropForRegion(rect(0, 0, 390, 844), rect(50, 256, 290, 180), 720, 1280);
+    expect(c.x + c.w / 2).toBeCloseTo(360, 0);
+    expect(c.y + c.h / 2).toBeCloseTo(525, 0);
+    expect(c.w).toBe(528);
+    expect(c.h).toBe(300);
+  });
+
+  it('decodes a wider area when the frame covers few camera pixels', () => {
+    const c = cropForRegion(rect(0, 0, 1280, 800), rect(495, 310, 290, 180), 1280, 720);
+    expect(c.w).toBe(768);
+    expect(c.x + c.w / 2).toBeCloseTo(640, 0);
+  });
+
+  it('keeps the crop inside the stream', () => {
+    const c = cropForRegion(rect(0, 0, 390, 844), rect(-100, -50, 290, 180), 720, 1280);
+    expect(c.x).toBe(0);
+    expect(c.y).toBe(0);
+    expect(c.x + c.w).toBeLessThanOrEqual(720);
+  });
+
+  it('falls back to the middle of the stream before layout', () => {
+    expect(cropForRegion(rect(0, 0, 0, 0), rect(0, 0, 0, 0), 1280, 720)).toEqual(centeredCrop(1280, 720));
   });
 });
